@@ -8,39 +8,23 @@
       <el-menu
         default-active="2"
         class="el-menu-vertical-demo"
-        @open="handleOpen"
-        @close="handleClose"
-        :collapse="isCollapse"
+        :collapse="true"
       >
-        <el-submenu index="1">
-          <template slot="title">
-            <i class="el-icon-location"></i>
-            <span slot="title">Navigator One</span>
-          </template>
-          <el-menu-item-group>
-            <span slot="title">Group One</span>
-            <el-menu-item index="1-1">item one</el-menu-item>
-            <el-menu-item index="1-2">item two</el-menu-item>
-          </el-menu-item-group>
-          <el-menu-item-group title="Group Two">
-            <el-menu-item index="1-3">item three</el-menu-item>
-          </el-menu-item-group>
-          <el-submenu index="1-4">
-            <span slot="title">item four</span>
-            <el-menu-item index="1-4-1">item one</el-menu-item>
-          </el-submenu>
-        </el-submenu>
+        <el-menu-item index="1" @click="navegateTo('PromotionList')">
+          <i class="fa pr-i fa-shopping-cart"></i>
+          <span slot="title">Promoções</span>
+        </el-menu-item>
         <el-menu-item index="2">
-          <i class="el-icon-menu"></i>
-          <span slot="title">Navigator Two</span>
+          <i class="fa pr-i fa-tags"></i>
+          <span slot="title">Cupons</span>
         </el-menu-item>
-        <el-menu-item index="3" disabled>
-          <i class="el-icon-document"></i>
-          <span slot="title">Navigator Three</span>
+        <el-menu-item index="3" :disabled="isDisabled" @click="navegateTo('AccountManage')">
+          <i class="fa pr-i fa-user"></i>
+          <span slot="title">Editar perfil</span>
         </el-menu-item>
-        <el-menu-item index="4">
-          <i class="el-icon-setting"></i>
-          <span slot="title">Navigator Four</span>
+        <el-menu-item index="4" @click="navegateTo('Login')">
+          <i class="fa pr-i fa-sign-in-alt"></i>
+          <span slot="title">Entrar</span>
         </el-menu-item>
       </el-menu>
     </div>
@@ -55,23 +39,32 @@
 export default {
   data() {
     return {
-      isCollapse: true,
+      isDisabled: false,
     };
   },
   methods: {
-    handleOpen(key, keyPath) {
-      console.log(key, keyPath);
-    },
-    handleClose(key, keyPath) {
-      console.log(key, keyPath);
+    navegateTo(routeName = 'Login') {
+      this.$router.push({
+        name: this.isDisabled ? 'Login' : routeName,
+      });
     },
   },
 };
 </script>
 
 <style lang="scss">
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+
+html,
+body {
+  font-family: 'Open Sans', sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
 #app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
+  margin: 10px 10px 0 0;
+  font-family: 'Open Sans', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -80,7 +73,8 @@ export default {
 }
 #nav {
   float: left;
-  width: 30%;
+  width: 75px;
+  height: 97%;
   position: fixed;
 
   a {
@@ -94,9 +88,54 @@ export default {
     width: 200px;
     min-height: 400px;
   }
+  ul {
+    height: 100%;
+  }
 }
 #main {
-  width: 70%;
+  width: calc(100% - 75px);
   float: right;
+}
+
+// ELEMENT-UI OVERRIDE
+.el-card__body {
+  padding: 0 !important;
+}
+
+.promotion-like {
+  .el-button {
+    padding: 0 !important;
+    color: #909399;
+    &:hover {
+      color: #909399;
+    }
+  }
+  &.active {
+    .el-button {
+      color: #66bb6a;
+      &:hover {
+        color: #66bb6a;
+      }
+    }
+  }
+}
+
+.promotion-report {
+  .el-button {
+    padding: 0 !important;
+    color: #909399;
+    &:hover {
+      color: #909399;
+    }
+  }
+  &.active {
+    .el-button {
+      padding: 0 !important;
+      color: #ff7043;
+      &:hover {
+        color: #ff7043;
+      }
+    }
+  }
 }
 </style>
