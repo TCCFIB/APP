@@ -1,2 +1,0 @@
-(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["account"],{9016:function(n,t,e){},da70:function(n,t,e){"use strict";e.r(t);var c=function(){var n=this,t=n.$createElement,e=n._self._c||t;return e("div",{attrs:{id:"account-container"}},[e("router-view")],1)},a=[],i={name:"Account"},o=i,u=(e("e0f4"),e("2877")),r=Object(u["a"])(o,c,a,!1,null,"29599b4a",null);r.options.__file="index.vue";t["default"]=r.exports},e0f4:function(n,t,e){"use strict";var c=e("9016"),a=e.n(c);a.a}}]);
-//# sourceMappingURL=account.6dee9a8c.js.map
