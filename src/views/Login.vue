@@ -15,14 +15,16 @@
       <el-form-item label="Senha" prop="pass">
         <el-input type="password" v-model="ruleForm2.pass" autocomplete="off"></el-input>
       </el-form-item>
-      <el-button
-        class="newAccountBtn"
-        @click="navegateToAccountManage"
-        type="text"
-      >
-        Criar nova conta
-      </el-button>
-      <el-form-item>
+      <el-row class="buttons-control">
+        <el-button
+          class="newAccountBtn"
+          @click="navegateToAccountManage"
+          type="text"
+        >
+          Criar nova conta
+        </el-button>
+      </el-row>
+      <el-form-item class="buttons-control">
         <el-button @click="resetForm('ruleForm2')">Cancelar</el-button>
         <el-button type="primary" @click="submitForm('ruleForm2')">Entrar</el-button>
       </el-form-item>
@@ -63,11 +65,13 @@ export default {
             message: 'Logado com sucesso. (fazer req e mandar para outra tela)',
             type: 'success',
           });
+
+          this.resetForm(formName);
           return true;
         }
 
         this.$message({
-          message: 'Existem campos não preenchidos ou inválidos ainda.',
+          message: 'Campos não preenchidos ou inválidos.',
           type: 'warning',
         });
         return false;
@@ -83,5 +87,9 @@ export default {
 <style scoped lang="scss">
 .newAccountBtn {
   margin-bottom: 10px;
+}
+
+.buttons-control {
+  text-align: right;
 }
 </style>

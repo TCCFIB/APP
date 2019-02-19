@@ -3,7 +3,7 @@
     <el-input placeholder="Filtrar promoção" v-model="filterText"></el-input>
 
     <div class="add-promotion">
-      <el-button type="primary">
+      <el-button type="primary" :disabled="!isLoggedIn" @click="openPromotionDialog">
         <i class="fa pr-i fa-plus-circle"></i>&nbsp;
         Cadastrar
       </el-button>
@@ -35,6 +35,18 @@
         </div>
       </el-card>
     </div>
+
+    <el-dialog title="Cadastrar promoção" :fullscreen="true" :visible.sync="dialogAddPromotionVisible">
+      <el-form :model="promotionForm" :rules="promotionFormRules" ref="promotionForm" label-position="top">
+        <el-form-item label="Promotion name" prop="name">
+          <el-input v-model="promotionForm.name" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="resetForm">Cancelar</el-button>
+        <el-button type="primary" @click="submitForm">Cadastrar</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -45,6 +57,16 @@ export default {
     return {
       filterText: '',
       isLoading: false,
+      isLoggedIn: true,
+      dialogAddPromotionVisible: false,
+      promotionForm: {
+        name: '',
+      },
+      promotionFormRules: {
+        name: [
+          { required: true, message: 'Por favor digite o nome', trigger: 'blur' },
+        ],
+      },
       promotions: [{
         id: Math.floor(Math.random() * 9999) + 1,
         name: 'Dipirona Monoidratada',
@@ -74,6 +96,32 @@ export default {
     },
     sendReport(id, index) {
       this.promotions[index].reportedByUser = !this.promotions[index].reportedByUser;
+    },
+    openPromotionDialog() {
+      this.dialogAddPromotionVisible = true;
+    },
+    submitForm() {
+      this.$refs['promotionForm'].validate((valid) => {
+        if (valid) {
+          this.$message({
+            message: 'Promoção cadastrada com sucesso. (fazer req e mandar para outra tela)',
+            type: 'success',
+          });
+
+          this.resetForm();
+          return true;
+        }
+
+        this.$message({
+          message: 'Campos não preenchidos ou inválidos.',
+          type: 'warning',
+        });
+        return false;
+      });
+    },
+    resetForm() {
+      this.$refs['promotionForm'].resetFields();
+      this.dialogAddPromotionVisible = false;
     },
   },
 };

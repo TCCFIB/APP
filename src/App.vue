@@ -102,6 +102,15 @@ body {
   padding: 0 !important;
 }
 
+.el-form--label-top .el-form-item__label {
+  float: left !important;
+  padding: 10px 0 0 0 !important;
+}
+
+.el-message {
+  min-width: 95% !important;
+}
+
 .promotion-like {
   .el-button {
     padding: 0 !important;

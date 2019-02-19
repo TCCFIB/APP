@@ -22,7 +22,7 @@
         <el-input type="password" v-model="ruleForm2.checkPass" autocomplete="off"></el-input>
       </el-form-item>
       <br />
-      <el-form-item>
+      <el-form-item class="buttons-control">
         <el-button @click="resetForm('ruleForm2')">Cancelar</el-button>
         <el-button type="primary" @click="submitForm('ruleForm2')">Cadastrar</el-button>
       </el-form-item>
@@ -87,11 +87,13 @@ export default {
             message: 'Cadastro realizado com sucesso. (fazer req e mandar para outra tela)',
             type: 'success',
           });
+
+          this.resetForm(formName);
           return true;
         }
 
         this.$message({
-          message: 'Existem campos não preenchidos ou inválidos ainda.',
+          message: 'Campos não preenchidos ou inválidos.',
           type: 'warning',
         });
         return false;
@@ -104,4 +106,8 @@ export default {
 };
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.buttons-control {
+  text-align: right;
+}
+</style>
