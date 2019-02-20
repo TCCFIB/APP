@@ -1,6 +1,13 @@
 <template>
   <div id="promotion-list-container">
-    <el-input placeholder="Filtrar promoção" v-model="filterText"></el-input>
+    <el-input placeholder="Filtrar promoção" @input="filterPromotionsByText" v-model="filterText">
+      <i
+        class="el-icon-close el-input__icon"
+        slot="suffix"
+        @click="emptyFilterText"
+        v-show="filterText.length > 0">
+      </i>
+    </el-input>
 
     <div class="buttons-control">
       <div class="order-promotion">
@@ -187,6 +194,19 @@ export default {
         // newer
         this.filteredPromotions = promotions.sort((a, b) => b.createdAt - a.createdAt);
       }
+    },
+    filterPromotionsByText(textSearch = '') {
+      const text = textSearch.toLowerCase();
+
+      if (text.length === 0) {
+        this.orderTypeSelected(this.orderTypeSelectedModel);
+      } else if (text.length > 2) {
+        this.filteredPromotions = this.filteredPromotions.filter(p => (p.name.toLowerCase().indexOf(text) !== -1 || p.drugstoreName.toLowerCase().indexOf(text) !== -1 || p.authorName.toLowerCase().indexOf(text) !== -1));
+      }
+    },
+    emptyFilterText() {
+      this.filterText = '';
+      this.filterPromotionsByText();
     },
   },
 };
