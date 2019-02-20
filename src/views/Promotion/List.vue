@@ -2,15 +2,27 @@
   <div id="promotion-list-container">
     <el-input placeholder="Filtrar promoção" v-model="filterText"></el-input>
 
-    <div class="add-promotion">
-      <el-button type="primary" :disabled="!isLoggedIn" @click="openPromotionDialog">
-        <i class="fa pr-i fa-plus-circle"></i>&nbsp;
-        Cadastrar
-      </el-button>
+    <div class="buttons-control">
+      <div class="order-promotion">
+        <el-select @change="orderTypeSelected" v-model="orderTypeSelectedModel">
+          <el-option
+            v-for="item in orderOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+      </div>
+      <div class="add-promotion">
+        <el-button type="primary" :disabled="!isLoggedIn" @click="openPromotionDialog">
+          <i class="fa pr-i fa-plus-circle"></i>&nbsp;
+          Cadastrar
+        </el-button>
+      </div>
     </div>
 
     <div class="cards-wrapper" v-loading="isLoading">
-      <el-card class="promotion-card" v-for="(p, index) in promotions" :key="p.id">
+      <el-card class="promotion-card" v-for="(p, index) in filteredPromotions" :key="p.id">
         <div class="promotion-image">
           <img :src="p.image" />
         </div>
@@ -36,10 +48,16 @@
       </el-card>
     </div>
 
-    <el-dialog title="Cadastrar promoção" :fullscreen="true" :visible.sync="dialogAddPromotionVisible">
+    <el-dialog title="Cadastrar promoção" :fullscreen="true" :visible.sync="dialogAddPromotionVisible" @close="resetForm">
       <el-form :model="promotionForm" :rules="promotionFormRules" ref="promotionForm" label-position="top">
-        <el-form-item label="Promotion name" prop="name">
+        <el-form-item label="Nome do remédio" prop="name">
           <el-input v-model="promotionForm.name" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="Preço" prop="price">
+          <el-input v-model="promotionForm.price" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="Farmácia" prop="drugstoreName">
+          <el-input v-model="promotionForm.drugstoreName" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -61,10 +79,37 @@ export default {
       dialogAddPromotionVisible: false,
       promotionForm: {
         name: '',
+        price: '',
+        drugstoreName: '',
       },
+      orderTypeSelectedModel: 'newer',
+      orderOptions: [
+        {
+          value: 'newer',
+          label: 'Mais novo',
+        },
+        {
+          value: 'older',
+          label: 'Mais velho',
+        },
+        {
+          value: 'expensive',
+          label: 'Mais caro',
+        },
+        {
+          value: 'cheaper',
+          label: 'Mais barato',
+        },
+      ],
       promotionFormRules: {
         name: [
           { required: true, message: 'Por favor digite o nome', trigger: 'blur' },
+        ],
+        price: [
+          { required: true, message: 'Por favor digite o preço', trigger: 'blur' },
+        ],
+        drugstoreName: [
+          { required: true, message: 'Por favor digite a farmácia', trigger: 'blur' },
         ],
       },
       promotions: [{
@@ -77,6 +122,7 @@ export default {
         likesCount: 8,
         reportedByUser: false,
         likedByUser: false,
+        createdAt: 1451856110000,
       }, {
         id: Math.floor(Math.random() * 9999) + 1,
         name: 'Epocler',
@@ -87,8 +133,13 @@ export default {
         likesCount: 22,
         reportedByUser: true,
         likedByUser: true,
+        createdAt: 1550628318039,
       }],
+      filteredPromotions: [],
     };
+  },
+  created() {
+    this.orderTypeSelected();
   },
   methods: {
     sendLike(id, index) {
@@ -123,6 +174,20 @@ export default {
       this.$refs['promotionForm'].resetFields();
       this.dialogAddPromotionVisible = false;
     },
+    orderTypeSelected(selected) {
+      const promotions = JSON.parse(JSON.stringify(this.promotions));
+
+      if (selected === 'older') {
+        this.filteredPromotions = promotions.sort((a, b) => a.createdAt - b.createdAt);
+      } else if (selected === 'expensive') {
+        this.filteredPromotions = promotions.sort((a, b) => b.price - a.price);
+      } else if (selected === 'cheaper') {
+        this.filteredPromotions = promotions.sort((a, b) => a.price - b.price);
+      } else {
+        // newer
+        this.filteredPromotions = promotions.sort((a, b) => b.createdAt - a.createdAt);
+      }
+    },
   },
 };
 </script>
@@ -133,10 +198,22 @@ export default {
   min-height: 400px;
 }
 
-.add-promotion {
-  text-align: right;
+.buttons-control {
+  overflow: hidden;
   margin-top: 15px;
+
+  .order-promotion {
+    width: 50%;
+    float: left;
+  }
+
+  .add-promotion {
+    width: 50%;
+    float: right;
+    text-align: right;
+  }
 }
+
 
 .promotion-card {
   margin-bottom: 15px;
