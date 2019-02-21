@@ -52,6 +52,13 @@ export default {
       },
     };
   },
+  created() {
+    if (this.$store.state.isLoggedIn) {
+      this.$router.push({
+        name: 'PromotionList',
+      });
+    }
+  },
   methods: {
     navegateToAccountManage() {
       this.$router.push({

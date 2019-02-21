@@ -6,9 +6,9 @@
         <el-radio-button :label="true">collapse</el-radio-button>
       </el-radio-group> -->
       <el-menu
-        default-active="2"
         class="el-menu-vertical-demo"
         :collapse="true"
+        :default-active="activeMenu"
       >
         <el-menu-item index="1" @click="navegateTo('PromotionList')">
           <i class="fa pr-i fa-shopping-cart"></i>
@@ -18,11 +18,11 @@
           <i class="fa pr-i fa-tags"></i>
           <span slot="title">Cupons</span>
         </el-menu-item>
-        <el-menu-item index="3" :disabled="isDisabled" @click="navegateTo('AccountManage')">
+        <el-menu-item index="3" :disabled="!isLoggedIn" @click="navegateTo('AccountManage')">
           <i class="fa pr-i fa-user"></i>
           <span slot="title">Editar perfil</span>
         </el-menu-item>
-        <el-menu-item index="4" @click="navegateTo('Login')">
+        <el-menu-item index="4" v-show="!isLoggedIn" @click="navegateTo('Login')">
           <i class="fa pr-i fa-sign-in-alt"></i>
           <span slot="title">Entrar</span>
         </el-menu-item>
@@ -39,13 +39,30 @@
 export default {
   data() {
     return {
-      isDisabled: false,
+      isLoggedIn: this.$store.state.isLoggedIn,
     };
+  },
+  computed: {
+    activeMenu() {
+      switch(this.$route.name) {
+        case 'PromotionList':
+        default:
+          return '1';
+          break;
+        case 'AccountManage':
+          return '3';
+          break;
+        case 'Login':
+          return '4';
+          break;
+      }
+    },
   },
   methods: {
     navegateTo(routeName = 'Login') {
       this.$router.push({
-        name: this.isDisabled ? 'Login' : routeName,
+        // name: !this.isLoggedIn ? 'Login' : routeName,
+        name: routeName,
       });
     },
   },

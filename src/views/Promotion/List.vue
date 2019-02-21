@@ -1,6 +1,6 @@
 <template>
   <div id="promotion-list-container">
-    <el-input placeholder="Filtrar promoção" @input="filterPromotionsByText" v-model="filterText">
+    <el-input placeholder="Filtrar promoção" @keyup.native="filterPromotionsByText" v-model="filterText">
       <i
         class="el-icon-close el-input__icon"
         slot="suffix"
@@ -72,6 +72,18 @@
         <el-button type="primary" @click="submitForm">Cadastrar</el-button>
       </span>
     </el-dialog>
+
+    <el-dialog title="Denunciar promoção" :fullscreen="true" :visible.sync="dialogReportPromotionVisible" @close="resetFormReport">
+      <el-form :model="reportPromotionForm" :rules="reportPromotionFormRules" ref="reportPromotionForm" label-position="top">
+        <el-form-item label="Qual o motivo da denúncia?" prop="whyReport">
+          <el-input type="textarea" :rows="4" v-model="reportPromotionForm.whyReport"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="resetFormReport">Cancelar</el-button>
+        <el-button type="primary" @click="submitFormReport">Denunciar</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -82,12 +94,16 @@ export default {
     return {
       filterText: '',
       isLoading: false,
-      isLoggedIn: true,
+      isLoggedIn: this.$store.state.isLoggedIn,
       dialogAddPromotionVisible: false,
+      dialogReportPromotionVisible: false,
       promotionForm: {
         name: '',
         price: '',
         drugstoreName: '',
+      },
+      reportPromotionForm: {
+        whyReport: '',
       },
       orderTypeSelectedModel: 'newer',
       orderOptions: [
@@ -117,6 +133,11 @@ export default {
         ],
         drugstoreName: [
           { required: true, message: 'Por favor digite a farmácia', trigger: 'blur' },
+        ],
+      },
+      reportPromotionFormRules: {
+        whyReport: [
+          { required: true, message: 'Por favor digite o motivo', trigger: 'blur' },
         ],
       },
       promotions: [{
@@ -150,10 +171,22 @@ export default {
   },
   methods: {
     sendLike(id, index) {
-      this.promotions[index].likedByUser = !this.promotions[index].likedByUser;
+      if (!this.isLoggedIn) return false;
+
+      this.filteredPromotions[index].likedByUser = !this.filteredPromotions[index].likedByUser;
+
+      if (this.filteredPromotions[index].likedByUser) {
+        this.filteredPromotions[index].likesCount++;
+      } else {
+        this.filteredPromotions[index].likesCount--;
+      }
     },
     sendReport(id, index) {
-      this.promotions[index].reportedByUser = !this.promotions[index].reportedByUser;
+      if (!this.isLoggedIn) return false;
+
+      this.filteredPromotions[index].reportedByUser = !this.filteredPromotions[index].reportedByUser;
+
+      this.dialogReportPromotionVisible = true;
     },
     openPromotionDialog() {
       this.dialogAddPromotionVisible = true;
@@ -162,7 +195,7 @@ export default {
       this.$refs['promotionForm'].validate((valid) => {
         if (valid) {
           this.$message({
-            message: 'Promoção cadastrada com sucesso. (fazer req e mandar para outra tela)',
+            message: 'Promoção cadastrada com sucesso.',
             type: 'success',
           });
 
@@ -177,9 +210,32 @@ export default {
         return false;
       });
     },
+    submitFormReport() {
+      this.$refs['reportPromotionForm'].validate((valid) => {
+        if (valid) {
+          this.$message({
+            message: 'Denúncia enviada com sucesso.',
+            type: 'success',
+          });
+
+          this.resetFormReport();
+          return true;
+        }
+
+        this.$message({
+          message: 'Campos não preenchidos ou inválidos.',
+          type: 'warning',
+        });
+        return false;
+      });
+    },
     resetForm() {
       this.$refs['promotionForm'].resetFields();
       this.dialogAddPromotionVisible = false;
+    },
+    resetFormReport() {
+      this.$refs['reportPromotionForm'].resetFields();
+      this.dialogReportPromotionVisible = false;
     },
     orderTypeSelected(selected) {
       const promotions = JSON.parse(JSON.stringify(this.promotions));
@@ -195,8 +251,8 @@ export default {
         this.filteredPromotions = promotions.sort((a, b) => b.createdAt - a.createdAt);
       }
     },
-    filterPromotionsByText(textSearch = '') {
-      const text = textSearch.toLowerCase();
+    filterPromotionsByText(e) {
+      const text = e.target.value.toLowerCase();
 
       if (text.length === 0) {
         this.orderTypeSelected(this.orderTypeSelectedModel);
