@@ -23,5 +23,6 @@
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />
     </platform>
+    <preference name="loadUrlTimeoutValue" value="120000" />
     <engine name="browser" spec="^5.0.4" />
 </widget>
