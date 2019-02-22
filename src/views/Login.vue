@@ -33,6 +33,8 @@
 </template>
 
 <script>
+import requester from '@/requester';
+
 export default {
   name: 'Login',
   data() {
@@ -68,12 +70,29 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          this.$message({
-            message: 'Logado com sucesso. (fazer req e mandar para outra tela)',
-            type: 'success',
+          requester.post('/login', {
+            email: this.ruleForm2.email,
+            password: this.ruleForm2.pass,
+          }).then(({ data }) => {
+            this.$store.dispatch('setUserData', {
+              email: this.ruleForm2.email,
+              name: data.data.user.name,
+              id: data.data.user.id,
+              token: data.data.token,
+            });
+
+            this.$message({
+              message: 'Logado com sucesso.',
+              type: 'success',
+            });
+
+            this.resetForm(formName);
+
+            this.$router.push({
+              name: 'PromotionList',
+            });
           });
 
-          this.resetForm(formName);
           return true;
         }
 

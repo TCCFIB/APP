@@ -31,6 +31,8 @@
 </template>
 
 <script>
+import requester from '@/requester';
+
 export default {
   name: 'AccountManage',
   data() {
@@ -79,16 +81,43 @@ export default {
       },
     };
   },
+  created() {
+    if (this.$store.state.isLoggedIn) {
+      this.ruleForm2.name = this.$store.state.userData.name;
+      this.ruleForm2.email = this.$store.state.userData.email;
+    }
+  },
   methods: {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          this.$message({
-            message: 'Cadastro realizado com sucesso. (fazer req e mandar para outra tela)',
-            type: 'success',
-          });
+          if (!this.$store.state.isLoggedIn) {
+            requester.post('/register', {
+              name: this.ruleForm2.name,
+              email: this.ruleForm2.email,
+              password: this.ruleForm2.pass,
+              c_password: this.ruleForm2.checkPass,
+            })
+            .then(({ data }) => {
+              this.$store.dispatch('setUserData', {
+                email: this.ruleForm2.email,
+                name: data.data.name,
+                token: data.data.token,
+              });
 
-          this.resetForm(formName);
+              this.$message({
+                message: 'Cadastro realizado com sucesso.',
+                type: 'success',
+              });
+
+              this.resetForm(formName);
+
+              this.$router.push({
+                name: 'PromotionList',
+              });
+            });
+          }
+
           return true;
         }
 

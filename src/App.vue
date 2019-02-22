@@ -26,6 +26,10 @@
           <i class="fa pr-i fa-sign-in-alt"></i>
           <span slot="title">Entrar</span>
         </el-menu-item>
+        <el-menu-item index="5" v-show="isLoggedIn" @click="logOut">
+          <i class="fa pr-i fa-sign-out-alt"></i>
+          <span slot="title">Sair</span>
+        </el-menu-item>
       </el-menu>
     </div>
 
@@ -37,11 +41,6 @@
 
 <script>
 export default {
-  data() {
-    return {
-      isLoggedIn: this.$store.state.isLoggedIn,
-    };
-  },
   computed: {
     activeMenu() {
       switch(this.$route.name) {
@@ -57,6 +56,9 @@ export default {
           break;
       }
     },
+    isLoggedIn() {
+      return this.$store.state.isLoggedIn;
+    },
   },
   methods: {
     navegateTo(routeName = 'Login') {
@@ -64,6 +66,10 @@ export default {
         // name: !this.isLoggedIn ? 'Login' : routeName,
         name: routeName,
       });
+    },
+    logOut() {
+      this.$store.dispatch('unsetUserData');
+      this.navegateTo('Login');
     },
   },
 };

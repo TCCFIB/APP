@@ -14,4 +14,12 @@ module.exports = {
   parserOptions: {
     parser: 'babel-eslint',
   },
+  overrides: [
+    {
+      files: ['src/store.js'],
+      rules: {
+        'no-param-reassign': 'off',
+      },
+    },
+  ],
 };
