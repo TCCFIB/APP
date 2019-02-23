@@ -36,10 +36,9 @@
         <div class="promotion-details">
           <div class="promotion-title"> {{ p.name }} </div>
           <div class="promotion-price"> {{ p.price | currency }} </div>
-          <div class="promotion-drugstore"> {{ p.drugstoreName}} </div>
+          <div class="promotion-drugstore"> {{ p.authorName }} </div>
         </div>
         <div class="promotion-more-details">
-          <div class="promotion-author"> {{ p.authorName }} </div>
           <div class="promotion-report" :class="{ 'active': p.reportedByUser }">
             <el-button type="text" @click="sendReport(p.id, index)">
               <i class="fas pr-i fa-exclamation-triangle"></i>
@@ -63,8 +62,20 @@
         <el-form-item label="Preço" prop="price">
           <el-input v-model="promotionForm.price" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="Farmácia" prop="drugstoreName">
-          <el-input v-model="promotionForm.drugstoreName" autocomplete="off"></el-input>
+        <el-form-item label="Site" prop="location">
+          <el-input v-model="promotionForm.location" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="Produto" prop="product" class="field-with-select">
+          <el-select v-model="promotionForm.product">
+            <el-option label="Epocler" value="1"></el-option>
+            <el-option label="Dipirona Monoidratada" value="2"></el-option>
+          </el-select>
+        </el-form-item>
+        <el-form-item label="Início" prop="start" class="field-with-select">
+          <el-date-picker type="date" v-model="promotionForm.start" style="width: 100%;"></el-date-picker>
+        </el-form-item>
+        <el-form-item label="Fim" prop="end" class="field-with-select">
+          <el-date-picker type="date" v-model="promotionForm.end" style="width: 100%;"></el-date-picker>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -100,7 +111,10 @@ export default {
       promotionForm: {
         name: '',
         price: '',
-        drugstoreName: '',
+        location: '',
+        product: '',
+        start: '',
+        end: '',
       },
       reportPromotionForm: {
         whyReport: '',
@@ -131,8 +145,17 @@ export default {
         price: [
           { required: true, message: 'Por favor digite o preço', trigger: 'blur' },
         ],
-        drugstoreName: [
-          { required: true, message: 'Por favor digite a farmácia', trigger: 'blur' },
+        location: [
+          { required: true, message: 'Por favor digite o link do site', trigger: 'blur' },
+        ],
+        product: [
+          { required: true, message: 'Por favor selecione um produto', trigger: 'change' }
+        ],
+        start: [
+          { type: 'date', required: true, message: 'Por favor escolha uma data de início', trigger: 'change' }
+        ],
+        end: [
+          { type: 'date', required: true, message: 'Por favor escolha uma data de fim', trigger: 'change' }
         ],
       },
       reportPromotionFormRules: {
@@ -145,7 +168,7 @@ export default {
         name: 'Dipirona Monoidratada',
         image: 'https://static.ultrafarma.com.br//media/imagens_produtos/800px/00/000/60/6/00066092.jpg',
         price: 49.9,
-        drugstoreName: 'Drogasil',
+        location: 'Drogasil',
         authorName: 'Helder Traci',
         likesCount: 8,
         reportedByUser: false,
@@ -156,7 +179,7 @@ export default {
         name: 'Epocler',
         image: 'https://drogariaspacheco.vteximg.com.br/arquivos/ids/347893-400-400/epocler-abacaxi-6-flaconetes-10ml-cada-Pacheco-504793.jpg?v=636663964469870000',
         price: 7.25,
-        drugstoreName: 'Poupafarma',
+        location: 'Poupafarma',
         authorName: 'Kassia Hayashi',
         likesCount: 22,
         reportedByUser: true,
@@ -268,101 +291,113 @@ export default {
 };
 </script>
 
-<style scoped lang="scss">
-.cards-wrapper {
-  margin: 15px 0;
-  min-height: 400px;
-}
-
-.buttons-control {
-  overflow: hidden;
-  margin-top: 15px;
-
-  .order-promotion {
-    width: 50%;
-    float: left;
+<style lang="scss">
+#promotion-list-container {
+  .cards-wrapper {
+    margin: 15px 0;
+    min-height: 400px;
   }
 
-  .add-promotion {
-    width: 50%;
-    float: right;
-    text-align: right;
-  }
-}
+  .buttons-control {
+    overflow: hidden;
+    margin-top: 15px;
 
+    .order-promotion {
+      width: 50%;
+      float: left;
+    }
 
-.promotion-card {
-  margin-bottom: 15px;
-  padding: 10px 0;
-  height: 120px;
-  overflow: hidden;
-
-  .promotion-image {
-    float: left;
-    width: 30%;
-    img {
-      width: 100%;
-      max-width: 87px;
+    .add-promotion {
+      width: 50%;
+      float: right;
+      text-align: right;
     }
   }
 
-  .promotion-details {
-    float: right;
-    text-align: left;
-    width: 65%;
 
-    .promotion-title {
-      font-weight: 700;
-    }
-
-    .promotion-price {
-      margin-top: 10px;
-      font-weight: 700;
-      font-size: 22px;
-      color: #66bb6a;
-    }
-
-    .promotion-drugstore {
-      font-size: 12px;
-      margin-top: 7px;
-    }
-  }
-
-  .promotion-more-details {
-    float: left;
-    width: 100%;
+  .promotion-card {
+    margin-bottom: 15px;
+    padding: 10px 0;
+    height: 120px;
     overflow: hidden;
 
-    .promotion-author {
+    .promotion-image {
       float: left;
-      font-size: 14px;
-      margin: 10px 0 0 10px;
-    }
-
-    .promotion-like {
-      float: right;
-      margin: 5px 5px 0 0;
-      i {
-        color: #909399;
-      }
-      &.active {
-        i {
-          color: #66bb6a;
-        }
+      width: 30%;
+      img {
+        width: 100%;
+        max-width: 87px;
       }
     }
 
-    .promotion-report {
+    .promotion-details {
       float: right;
-      margin: 5px 10px 0 10px;
-      i {
-        color: #909399;
+      text-align: left;
+      width: 65%;
+
+      .promotion-title {
+        font-weight: 700;
       }
-      &.active {
+
+      .promotion-price {
+        margin-top: 10px;
+        font-weight: 700;
+        font-size: 22px;
+        color: #66bb6a;
+      }
+
+      .promotion-drugstore {
+        font-size: 12px;
+        margin-top: 7px;
+      }
+    }
+
+    .promotion-more-details {
+      float: left;
+      width: 100%;
+      overflow: hidden;
+
+      .promotion-author {
+        float: left;
+        font-size: 14px;
+        margin: 10px 0 0 10px;
+      }
+
+      .promotion-like {
+        float: right;
+        margin: 5px 5px 0 0;
         i {
-          color: #ff7043;
+          color: #909399;
+        }
+        &.active {
+          i {
+            color: #66bb6a;
+          }
         }
       }
+
+      .promotion-report {
+        float: right;
+        margin: 5px 10px 0 10px;
+        i {
+          color: #909399;
+        }
+        &.active {
+          i {
+            color: #ff7043;
+          }
+        }
+      }
+    }
+  }
+
+  .field-with-select {
+    .el-form-item__label {
+      width: 100%;
+    }
+
+    .el-select {
+      width: 100%;
     }
   }
 }
