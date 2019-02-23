@@ -71,11 +71,11 @@
             <el-option label="Dipirona Monoidratada" value="2"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="Início" prop="start" class="field-with-select">
-          <el-date-picker type="date" v-model="promotionForm.start" style="width: 100%;"></el-date-picker>
+        <el-form-item label="Início" prop="start" class="field-with-select" style="width: 48%; float: left; margin-bottom: 35px;">
+          <el-date-picker type="date" format="dd/MM/yyyy" v-model="promotionForm.start" style="width: 100%;"></el-date-picker>
         </el-form-item>
-        <el-form-item label="Fim" prop="end" class="field-with-select">
-          <el-date-picker type="date" v-model="promotionForm.end" style="width: 100%;"></el-date-picker>
+        <el-form-item label="Fim" prop="end" class="field-with-select" style="width: 48%; float: right; margin-bottom: 35px;">
+          <el-date-picker type="date" format="dd/MM/yyyy" v-model="promotionForm.end" style="width: 100%;"></el-date-picker>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -180,7 +180,7 @@ export default {
         image: 'https://drogariaspacheco.vteximg.com.br/arquivos/ids/347893-400-400/epocler-abacaxi-6-flaconetes-10ml-cada-Pacheco-504793.jpg?v=636663964469870000',
         price: 7.25,
         location: 'Poupafarma',
-        authorName: 'Kassia Hayashi',
+        authorName: 'Lucas Almeida',
         likesCount: 22,
         reportedByUser: true,
         likedByUser: true,
@@ -280,12 +280,12 @@ export default {
       if (text.length === 0) {
         this.orderTypeSelected(this.orderTypeSelectedModel);
       } else if (text.length > 2) {
-        this.filteredPromotions = this.filteredPromotions.filter(p => (p.name.toLowerCase().indexOf(text) !== -1 || p.drugstoreName.toLowerCase().indexOf(text) !== -1 || p.authorName.toLowerCase().indexOf(text) !== -1));
+        this.filteredPromotions = this.filteredPromotions.filter(p => (p.name.toLowerCase().indexOf(text) !== -1 || p.location.toLowerCase().indexOf(text) !== -1 || p.authorName.toLowerCase().indexOf(text) !== -1));
       }
     },
     emptyFilterText() {
       this.filterText = '';
-      this.filterPromotionsByText();
+      this.filterPromotionsByText({ target: { value: '' } });
     },
   },
 };

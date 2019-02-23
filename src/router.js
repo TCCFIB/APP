@@ -34,6 +34,18 @@ export default new Router({
       ],
     },
     {
+      path: '/coupon',
+      name: 'Coupon',
+      component: () => import(/* webpackChunkName: "coupon" */ '@/views/Coupon'),
+      children: [
+        {
+          path: '',
+          name: 'CouponList',
+          component: () => import(/* webpackChunkName: "coupon-list" */ '@/views/Coupon/List'),
+        },
+      ],
+    },
+    {
       path: '/login',
       name: 'Login',
       component: () => import(/* webpackChunkName: "login" */ '@/views/Login'),

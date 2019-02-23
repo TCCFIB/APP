@@ -14,7 +14,7 @@
           <i class="fa pr-i fa-shopping-cart"></i>
           <span slot="title">Promoções</span>
         </el-menu-item>
-        <el-menu-item index="2">
+        <el-menu-item index="2" @click="navegateTo('CouponList')">
           <i class="fa pr-i fa-tags"></i>
           <span slot="title">Cupons</span>
         </el-menu-item>
