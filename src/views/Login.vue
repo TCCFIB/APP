@@ -91,6 +91,12 @@ export default {
             this.$router.push({
               name: 'PromotionList',
             });
+          })
+          .catch(() => {
+            this.$message({
+              message: 'Erro ao logar.',
+              type: 'error',
+            });
           });
 
           return true;

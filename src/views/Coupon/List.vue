@@ -77,6 +77,8 @@
 </template>
 
 <script>
+import requester from '@/requester';
+
 export default {
   name: 'CouponList',
   data() {
@@ -129,7 +131,7 @@ export default {
           { required: true, message: 'Por favor digite o motivo', trigger: 'blur' },
         ],
       },
-      coupons: [{
+      coupons: [/*{
         id: Math.floor(Math.random() * 9999) + 1,
         name: 'Vitamina C',
         description: 'Desconto de 10% em todos os produtos de vitamina C.',
@@ -147,14 +149,34 @@ export default {
         description: 'Leve 3 e pague 2 em todos os cremes dentais.',
         location: '',
         createdAt: 1451856110000,
-      }],
+      }*/],
       filteredCoupons: [],
     };
   },
   created() {
-    this.orderTypeSelected();
+    this.feedCoupons();
   },
   methods: {
+    feedCoupons() {
+      this.isLoading = true;
+
+      requester({
+        url: '/coupons',
+        headers: {
+          Authorization: `Bearer ${this.$store.state.userData.token}`,
+        }
+      })
+        .then(({ data }) => {
+          this.isLoading = false;
+
+          this.coupons = data.data.map(c => Object.assign({}, c, {
+            description: `${c.description} ${c.location}`,
+            createdAt: new Date(c.start).getTime(),
+          }));
+
+          this.orderTypeSelected();
+        });
+    },
     sendLike(id, index) {
       if (!this.isLoggedIn) return false;
 
@@ -179,12 +201,32 @@ export default {
     submitForm() {
       this.$refs['couponForm'].validate((valid) => {
         if (valid) {
-          this.$message({
-            message: 'Cupom cadastrado com sucesso.',
-            type: 'success',
+          const body = Object.assign({}, this.couponForm, {
+            start: new Date(this.couponForm.start).toISOString().slice(0, 19).replace('T', ' '),
+            end: new Date(this.couponForm.end).toISOString().slice(0, 19).replace('T', ' '),
+            user_id: this.$store.state.userData.id,
+            status: 1,
           });
 
-          this.resetForm();
+          requester({
+            method: 'POST',
+            url: '/coupons',
+            headers: {
+              Authorization: `Bearer ${this.$store.state.userData.token}`,
+            },
+            data: body,
+          })
+            .then(({ data }) => {
+              this.feedCoupons();
+
+              this.$message({
+                message: 'Cupom cadastrado com sucesso.',
+                type: 'success',
+              });
+
+              this.resetForm();
+            });
+
           return true;
         }
 
@@ -289,6 +331,7 @@ export default {
         margin-top: 10px;
         font-size: 18px;
         opacity: 0.6;
+        word-break: break-word;
       }
 
       .coupon-drugstore {

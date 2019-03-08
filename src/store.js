@@ -9,11 +9,15 @@ export default new Vuex.Store({
   state: {
     isLoggedIn: storage.getItem('userData'),
     userData: storage.getItem('userData') ? JSON.parse(storage.getItem('userData')) : {},
+    baseUrl: storage.getItem('baseUrl') ? storage.getItem('baseUrl') : 'http://localhost',
   },
   mutations: {
     SET_USER_DATA(state, userData) {
       state.userData = userData;
       state.isLoggedIn = Object.keys(userData).length > 0;
+    },
+    CHANGE_BASE_URL(state, baseUrl) {
+      state.baseUrl = baseUrl;
     },
   },
   actions: {
@@ -24,6 +28,10 @@ export default new Vuex.Store({
     unsetUserData({ commit }) {
       commit('SET_USER_DATA', {});
       storage.removeItem('userData');
+    },
+    changeBaseUrl({ commit }, baseUrl) {
+      commit('CHANGE_BASE_URL', baseUrl);
+      storage.setItem('baseUrl', baseUrl);
     },
   },
 });

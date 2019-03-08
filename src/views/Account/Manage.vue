@@ -24,7 +24,7 @@
       <br />
       <el-form-item class="buttons-control">
         <el-button @click="resetForm('ruleForm2')">Cancelar</el-button>
-        <el-button type="primary" @click="submitForm('ruleForm2')">Cadastrar</el-button>
+        <el-button type="primary" @click="submitForm('ruleForm2')">{{ $store.state.isLoggedIn ? 'Editar' : 'Cadastrar' }}</el-button>
       </el-form-item>
     </el-form>
   </div>
@@ -102,11 +102,31 @@ export default {
               this.$store.dispatch('setUserData', {
                 email: this.ruleForm2.email,
                 name: data.data.name,
+                id: data.data.id,
                 token: data.data.token,
               });
 
               this.$message({
                 message: 'Cadastro realizado com sucesso.',
+                type: 'success',
+              });
+
+              this.resetForm(formName);
+
+              this.$router.push({
+                name: 'PromotionList',
+              });
+            });
+          } else {
+            requester.put(`/user/${this.$store.state.userData.id}`, {
+              name: this.ruleForm2.name,
+              email: this.ruleForm2.email,
+              password: this.ruleForm2.pass,
+              c_password: this.ruleForm2.checkPass,
+            })
+            .then(() => {
+              this.$message({
+                message: 'Edição feita com sucesso.',
                 type: 'success',
               });
 

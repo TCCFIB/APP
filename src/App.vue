@@ -30,17 +30,38 @@
           <i class="fa pr-i fa-sign-out-alt"></i>
           <span slot="title">Sair</span>
         </el-menu-item>
+        <el-menu-item class="secret-button" index="6" @click="changeBaseUrl"></el-menu-item>
       </el-menu>
     </div>
 
     <div id="main">
       <router-view />
     </div>
+
+    <el-dialog title="Trocar a URL base" :fullscreen="true" :visible.sync="dialogChangeBaseUrlVisible" @close="resetForm">
+      <el-form :model="baseUrlForm" ref="baseUrlForm" label-position="top">
+        <el-form-item label="Nova URL base (Ex.: http://localhost)" prop="url">
+          <el-input v-model="baseUrlForm.url" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="resetForm">Cancelar</el-button>
+        <el-button type="primary" @click="submitForm">Cadastrar</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 export default {
+  data() {
+    return {
+      dialogChangeBaseUrlVisible: false,
+      baseUrlForm: {
+        url: 'http://',
+      },
+    };
+  },
   computed: {
     activeMenu() {
       switch(this.$route.name) {
@@ -71,12 +92,29 @@ export default {
       this.$store.dispatch('unsetUserData');
       this.navegateTo('Login');
     },
+    changeBaseUrl() {
+      this.dialogChangeBaseUrlVisible = true;
+    },
+    submitForm() {
+      this.$store.dispatch('changeBaseUrl', this.baseUrlForm.url);
+      this.resetForm();
+    },
+    resetForm() {
+      this.$refs['baseUrlForm'].resetFields();
+      this.dialogChangeBaseUrlVisible = false;
+    },
   },
 };
 </script>
 
 <style lang="scss">
 @import url('https://fonts.googleapis.com/css?family=Open+Sans');
+
+.secret-button {
+  bottom: 0 !important;
+  position: absolute !important;
+  width: 65px !important;
+}
 
 html,
 body {

@@ -59,16 +59,20 @@
         <el-form-item label="Nome do remédio" prop="name">
           <el-input v-model="promotionForm.name" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="Preço" prop="price">
-          <el-input v-model="promotionForm.price" autocomplete="off"></el-input>
+        <el-form-item label="Preço" prop="value">
+          <el-input v-model="promotionForm.value" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="Site" prop="location">
           <el-input v-model="promotionForm.location" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="Produto" prop="product" class="field-with-select">
-          <el-select v-model="promotionForm.product">
-            <el-option label="Epocler" value="1"></el-option>
-            <el-option label="Dipirona Monoidratada" value="2"></el-option>
+        <el-form-item label="Produto" prop="product_id" class="field-with-select">
+          <el-select v-model="promotionForm.product_id">
+            <el-option
+              v-for="product in products"
+              :key="product.value"
+              :label="product.label"
+              :value="product.value">
+            </el-option>
           </el-select>
         </el-form-item>
         <el-form-item label="Início" prop="start" class="field-with-select" style="width: 48%; float: left; margin-bottom: 35px;">
@@ -86,8 +90,8 @@
 
     <el-dialog title="Denunciar promoção" :fullscreen="true" :visible.sync="dialogReportPromotionVisible" @close="resetFormReport">
       <el-form :model="reportPromotionForm" :rules="reportPromotionFormRules" ref="reportPromotionForm" label-position="top">
-        <el-form-item label="Qual o motivo da denúncia?" prop="whyReport">
-          <el-input type="textarea" :rows="4" v-model="reportPromotionForm.whyReport"></el-input>
+        <el-form-item label="Qual o motivo da denúncia?" prop="comment">
+          <el-input type="textarea" :rows="4" v-model="reportPromotionForm.comment"></el-input>
         </el-form-item>
       </el-form>
       <span slot="footer" class="dialog-footer">
@@ -99,6 +103,8 @@
 </template>
 
 <script>
+import requester from '@/requester';
+
 export default {
   name: 'PromotionList',
   data() {
@@ -110,14 +116,15 @@ export default {
       dialogReportPromotionVisible: false,
       promotionForm: {
         name: '',
-        price: '',
+        value: '',
         location: '',
-        product: '',
+        product_id: '',
         start: '',
         end: '',
       },
       reportPromotionForm: {
-        whyReport: '',
+        comment: '',
+        promotion_id: '',
       },
       orderTypeSelectedModel: 'newer',
       orderOptions: [
@@ -159,11 +166,11 @@ export default {
         ],
       },
       reportPromotionFormRules: {
-        whyReport: [
+        comment: [
           { required: true, message: 'Por favor digite o motivo', trigger: 'blur' },
         ],
       },
-      promotions: [{
+      promotions: [/*{
         id: Math.floor(Math.random() * 9999) + 1,
         name: 'Dipirona Monoidratada',
         image: 'https://static.ultrafarma.com.br//media/imagens_produtos/800px/00/000/60/6/00066092.jpg',
@@ -185,29 +192,95 @@ export default {
         reportedByUser: true,
         likedByUser: true,
         createdAt: 1550628318039,
-      }],
+      }*/],
       filteredPromotions: [],
+      products: [],
     };
   },
   created() {
-    this.orderTypeSelected();
+    requester({
+      url: '/products',
+      headers: {
+        Authorization: `Bearer ${this.$store.state.userData.token}`,
+      }
+    })
+      .then(({ data }) => {
+        this.products = data.data.map(p => Object.assign({}, { label: p.name, value: p.id }));
+      });
+
+    this.feedPromotions();
   },
   methods: {
+    feedPromotions() {
+      this.isLoading = true;
+
+      requester({
+        url: '/promotions',
+        headers: {
+          Authorization: `Bearer ${this.$store.state.userData.token}`,
+        }
+      })
+        .then(({ data }) => {
+          this.isLoading = false;
+
+          this.promotions = data.data.map(p => Object.assign({}, p, {
+            image: p.products.image,
+            price: p.value,
+            authorName: p.users.name,
+            likesCount: p.likes.length,
+            reportedByUser: true, // sempre true
+            likedByUser: p.likes.some(l => l == this.$store.state.userData.id),
+            createdAt: new Date(p.start).getTime(),
+          }));
+
+          this.orderTypeSelected();
+        });
+    },
     sendLike(id, index) {
       if (!this.isLoggedIn) return false;
 
-      this.filteredPromotions[index].likedByUser = !this.filteredPromotions[index].likedByUser;
+      let request;
 
-      if (this.filteredPromotions[index].likedByUser) {
-        this.filteredPromotions[index].likesCount++;
+      if (!this.filteredPromotions[index].likedByUser) {
+        request = requester({
+          method: 'POST',
+          url: `/promotions/${id}/like`,
+          headers: {
+            Authorization: `Bearer ${this.$store.state.userData.token}`,
+          },
+          data: {
+            user_id: this.$store.state.userData.id,
+          },
+        });
       } else {
-        this.filteredPromotions[index].likesCount--;
+        request = requester({
+          method: 'POST',
+          url: `/promotions/${id}/unlike`,
+          headers: {
+            Authorization: `Bearer ${this.$store.state.userData.token}`,
+          },
+          data: {
+            user_id: this.$store.state.userData.id,
+          },
+        });
       }
+
+      request
+        .then(({ data }) => {
+          this.filteredPromotions[index].likedByUser = !this.filteredPromotions[index].likedByUser;
+
+          if (this.filteredPromotions[index].likedByUser) {
+            this.filteredPromotions[index].likesCount++;
+          } else {
+            this.filteredPromotions[index].likesCount--;
+          }
+        });
+
     },
     sendReport(id, index) {
       if (!this.isLoggedIn) return false;
 
-      this.filteredPromotions[index].reportedByUser = !this.filteredPromotions[index].reportedByUser;
+      this.reportPromotionForm.promotion_id = id;
 
       this.dialogReportPromotionVisible = true;
     },
@@ -217,12 +290,32 @@ export default {
     submitForm() {
       this.$refs['promotionForm'].validate((valid) => {
         if (valid) {
-          this.$message({
-            message: 'Promoção cadastrada com sucesso.',
-            type: 'success',
+          const body = Object.assign({}, this.promotionForm, {
+            start: new Date(this.promotionForm.start).toISOString().slice(0, 19).replace('T', ' '),
+            end: new Date(this.promotionForm.end).toISOString().slice(0, 19).replace('T', ' '),
+            user_id: this.$store.state.userData.id,
+            status: 1,
           });
 
-          this.resetForm();
+          requester({
+            method: 'POST',
+            url: '/promotions',
+            headers: {
+              Authorization: `Bearer ${this.$store.state.userData.token}`,
+            },
+            data: body,
+          })
+            .then(({ data }) => {
+              this.feedPromotions();
+
+              this.$message({
+                message: 'Promoção cadastrada com sucesso.',
+                type: 'success',
+              });
+
+              this.resetForm();
+            });
+
           return true;
         }
 
@@ -236,12 +329,27 @@ export default {
     submitFormReport() {
       this.$refs['reportPromotionForm'].validate((valid) => {
         if (valid) {
-          this.$message({
-            message: 'Denúncia enviada com sucesso.',
-            type: 'success',
+          const body = Object.assign({}, this.reportPromotionForm, {
+            user_id: this.$store.state.userData.id,
           });
 
-          this.resetFormReport();
+          requester({
+            method: 'POST',
+            url: `/promotions/${this.reportPromotionForm.promotion_id}/report`,
+            headers: {
+              Authorization: `Bearer ${this.$store.state.userData.token}`,
+            },
+            data: body,
+          })
+            .then(() => {
+              this.$message({
+                message: 'Denúncia enviada com sucesso.',
+                type: 'success',
+              });
+
+              this.resetFormReport();
+            });
+
           return true;
         }
 
