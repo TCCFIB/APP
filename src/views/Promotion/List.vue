@@ -229,7 +229,7 @@ export default {
             authorName: p.users.name,
             likesCount: p.likes.length,
             reportedByUser: true, // sempre true
-            likedByUser: p.likes.some(l => l == this.$store.state.userData.id),
+            likedByUser: p.likes.some(l => l.user_id == this.$store.state.userData.id),
             createdAt: new Date(p.start).getTime(),
           }));
 
