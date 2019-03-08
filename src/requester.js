@@ -1,11 +1,11 @@
 import axios from 'axios';
 
 const storage = window.localStorage;
-const baseUrl = storage.getItem('baseUrl') ? storage.getItem('baseUrl') : 'http://10.254.254.61';
+const baseUrl = storage.getItem('baseUrl') ? storage.getItem('baseUrl') : 'http://localhost/API/public/api';
 
 /* eslint-disable max-len */
 export default axios.create({
-  baseURL: `${baseUrl}/API/public/api`,
+  baseURL: `${baseUrl}`,
   headers: {
     'Content-Type': 'application/json',
   },

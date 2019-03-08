@@ -40,7 +40,7 @@
 
     <el-dialog title="Trocar a URL base" :fullscreen="true" :visible.sync="dialogChangeBaseUrlVisible" @close="resetForm">
       <el-form :model="baseUrlForm" ref="baseUrlForm" label-position="top">
-        <el-form-item label="Nova URL base (Ex.: http://localhost)" prop="url">
+        <el-form-item label="Nova URL base (Ex.: http://localhost/API/public/api)" prop="url">
           <el-input v-model="baseUrlForm.url" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>

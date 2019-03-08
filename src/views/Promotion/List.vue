@@ -250,6 +250,7 @@ export default {
           },
           data: {
             user_id: this.$store.state.userData.id,
+            promotion_id: id,
           },
         });
       } else {
@@ -261,6 +262,7 @@ export default {
           },
           data: {
             user_id: this.$store.state.userData.id,
+            promotion_id: id,
           },
         });
       }
@@ -426,7 +428,7 @@ export default {
   .promotion-card {
     margin-bottom: 15px;
     padding: 10px 0;
-    height: 120px;
+    height: 150px;
     overflow: hidden;
 
     .promotion-image {
